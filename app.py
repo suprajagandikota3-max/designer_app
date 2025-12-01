@@ -1,52 +1,44 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
-import io
 
-# Page settings
 st.set_page_config(page_title="Designer App", layout="centered")
 
-# App Title
 st.title("🎨 Smart Designer App")
-st.write("మీ own Poster / Design ని create చేయండి!")
+st.subheader("Text to Beautiful Image Generator")
 
-# User Input
-text = st.text_input("మీ Design Text Enter చేయండి:")
+# User input
+text = st.text_input("Enter the text for your design:")
 
-bg_color = st.color_picker("Background Color ఎంచుకోండి:", "#000000")
-text_color = st.color_picker("Text Color ఎంచుకోండి:", "#FFFFFF")
+bg_color = st.color_picker("Choose Background Color:", "#000000")
+text_color = st.color_picker("Choose Text Color:", "#FFFFFF")
 
-# Button
-if st.button("🎯 Generate Design"):
+if st.button("🎨 Generate Design"):
+    if text == "":
+        st.error("⚠️ Please enter some text!")
+    else:
+        # Create Image
+        img = Image.new("RGB", (800, 500), color=bg_color)
+        draw = ImageDraw.Draw(img)
 
-    # Create Image
-    img = Image.new("RGB", (600, 400), color=bg_color)
-    draw = ImageDraw.Draw(img)
-
-    # Default font
-    try:
-        font = ImageFont.truetype("arial.ttf", 30)
-    except:
+        # Default font
         font = ImageFont.load_default()
 
-    # Center Text
-    text_width, text_height = draw.textsize(text, font=font)
-    x = (600 - text_width) / 2
-    y = (400 - text_height) / 2
+        # Add text to image
+        draw.text((100, 220), text, fill=text_color, font=font)
 
-    draw.text((x, y), text, fill=text_color, font=font)
+        # Save Image
+        img.save("design.png")
 
-    # Show Image
-    st.image(img, caption="✅ Your Design is Ready!")
+        # Show Image in App
+        st.image(img, caption="✅ Your design is ready!")
 
-    # Download Option
-    buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
+        # Download Button
+        with open("design.png", "rb") as file:
+            st.download_button(
+                label="⬇️ Download Design",
+                data=file,
+                file_name="my_design.png",
+                mime="image/png"
+            )
 
-    st.download_button(
-        label="⬇️ Download Your Design",
-        data=buffer.getvalue(),
-        file_name="my_design.png",
-        mime="image/png"
-    )
-
-    st.success("✅ Design Successfully Created!")
+        st.success("🎉 Design Successfully Created!")
