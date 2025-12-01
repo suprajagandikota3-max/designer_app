@@ -6,16 +6,14 @@ st.set_page_config(page_title="Designer App", layout="centered")
 st.title("🎨 Smart Designer App")
 st.subheader("Advanced Text to Image Generator")
 
-# -------- USER CONTROLS --------
+# -------- USER INPUTS --------
 
 text = st.text_input("Enter your design text:")
 
-font_size = st.slider("Select Font Size", 20, 100, 40)
+bg_color = st.color_picker("Choose Background Color", "#000000")
+text_color = st.color_picker("Choose Text Color", "#FFFFFF")
 
 align = st.selectbox("Text Alignment", ["Left", "Center", "Right"])
-
-bg_color = st.color_picker("Background Color", "#000000")
-text_color = st.color_picker("Text Color", "#FFFFFF")
 
 width = st.slider("Image Width", 400, 1200, 800)
 height = st.slider("Image Height", 300, 800, 500)
@@ -24,15 +22,20 @@ height = st.slider("Image Height", 300, 800, 500)
 
 if st.button("🎨 Generate Design"):
     if text.strip() == "":
-        st.warning("Please enter some text first!")
+        st.warning("Please enter some text!")
     else:
+        # Create image
         img = Image.new("RGB", (width, height), color=bg_color)
         draw = ImageDraw.Draw(img)
 
         font = ImageFont.load_default()
 
-        text_width, text_height = draw.textsize(text, font=font)
+        # ✅ NEW SAFE METHOD (NO ERROR)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
 
+        # Text alignment logic
         if align == "Left":
             x = 20
         elif align == "Center":
@@ -46,13 +49,13 @@ if st.button("🎨 Generate Design"):
 
         img.save("design.png")
 
-        st.image(img, caption="✅ Your advanced design is ready!")
+        st.image(img, caption="✅ Your design is ready!")
 
         with open("design.png", "rb") as file:
             st.download_button(
                 label="⬇️ Download Design",
                 data=file,
-                file_name="my_advanced_design.png",
+                file_name="my_design.png",
                 mime="image/png"
             )
 
